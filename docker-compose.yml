@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  yolo-model:
+    build: ./yolo-model
+    container_name: yolo-model
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./yolo-model:/app
+
+  backend-api:
+    build: ./backend-api
+    container_name: backend-api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend-api:/app
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+
+  flutter-app:
+    build: ./flutter-app
+    container_name: flutter-app
+    # Flutter 앱은 보통 Docker에서 빌드 후 APK 추출에 사용
+    volumes:
+      - ./flutter-app:/app
