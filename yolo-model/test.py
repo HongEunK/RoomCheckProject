@@ -8,7 +8,7 @@ model = YOLO("yolov8n.pt")
 image_path = "test.jpg"  # 본인 이미지 경로로 변경하세요
 
 # 이미지 읽기
-image = cv2.imread(image_path)
+image = cv2.imread("/Users/eunhong/Projects/OpenSWProject/yolo-model/test.jpg")
 
 if image is None:
     print("이미지를 불러올 수 없습니다. 경로를 확인하세요.")
