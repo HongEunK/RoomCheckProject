@@ -106,6 +106,50 @@ class _MyHomePageState extends State<MyHomePage> {
         // UI를 갱신?
         _image = File(pickedFile.path); // 이미지를 파일 형식으로 변환해 _image라는 변수에 저장
       });
+      await _uploadImageToServer(_image!);
+    }
+  }
+
+  Future<void> _uploadImageToServer(File imageFile) async {
+    final bytes = await imageFile.readAsBytes(); // 이미지파일을 byte로 읽음
+    final base64Image = base64Encode(bytes); // 이 byte를 Base64문자열로 변환
+
+    const serverUrl =
+        'http://<YOUR_SERVER_IP>:5000/upload'; // Flask 서버 주소로 교체 -> pastapi로 띄운다
+
+    try {
+      final response = await http.post(
+        Uri.parse(serverUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'image': base64Image}),
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        print('서버 응답: $jsonResponse');
+
+        // 결과를 다이얼로그로 표시
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('객체 탐지 결과'),
+            content: Text(jsonResponse.toString()),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('확인'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        throw Exception('서버 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('업로드 실패: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('에러: $e')));
     }
   }
 
