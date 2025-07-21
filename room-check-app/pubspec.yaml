@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   camera: ^0.10.5+2
   image_picker: ^1.0.7 # 갤러리에서 사진 가져오기 위한 플러그인 (가장 최신 버전)
-  http: ^0.13.6 
+  http: ^0.13.6
 
 dev_dependencies:
   flutter_test:
