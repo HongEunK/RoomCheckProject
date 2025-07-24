@@ -14,6 +14,11 @@ from torch.nn.modules.upsampling import Upsample
 import numpy as np
 import cv2
 import logging
+from fastapi import FastAPI, Request
+from pydantic import BaseModel
+import base64
+import io
+from PIL import Image
 
 add_safe_globals([
     Conv2d,
@@ -34,6 +39,10 @@ add_safe_globals([
 ])
 
 app = FastAPI()
+
+class ImageData(BaseModel):
+    image: str
+
 model = YOLO("yolov8n.pt")
 
 logging.basicConfig(level=logging.INFO)
@@ -65,3 +74,26 @@ async def detect(file: UploadFile = File(...)):
 
     logging.info(f"Detections: {detections}")
     return {"detections": detections}
+
+@app.post("/upload")
+async def upload_image(data: ImageData):
+    image_bytes = base64.b64decode(data.image)
+    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    image_np = np.array(image)
+
+    results = model.predict(source=image_np, conf=0.25, verbose=False)
+    detections = []
+
+    for result in results:
+        boxes = result.boxes.xyxy.cpu().numpy()
+        classes = result.boxes.cls.cpu().numpy()
+        confidences = result.boxes.conf.cpu().numpy()
+        for box, cls, conf in zip(boxes, classes, confidences):
+            detections.append({
+                "box": [round(coord, 2) for coord in box.tolist()],
+                "class": int(cls),
+                "label": model.names[int(cls)],
+                "confidence": round(float(conf), 2)
+            })
+
+    return {"message": "객체 탐지 완료", "detections": detections}
