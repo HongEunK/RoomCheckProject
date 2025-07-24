@@ -115,8 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final base64Image = base64Encode(bytes); // 이 byte를 Base64문자열로 변환
 
     const serverUrl =
-        'http://<YOUR_SERVER_IP>:5000/upload'; // Flask 서버 주소로 교체 -> pastapi로 띄운다
-
+        'http://10.0.2.2:8000/upload'; //실제 Android 기기에서 테스트할 경우 : const serverUrl = 'http://192.168.0.123:8000/upload';
     try {
       final response = await http.post(
         Uri.parse(serverUrl),
